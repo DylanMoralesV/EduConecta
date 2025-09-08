@@ -1,0 +1,526 @@
+
+<!doctype html>
+<html lang="es" dir="ltr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>EduConecta · Prototipo v2 (Solemne 2)</title>
+  <meta name="description" content="EduConecta: guías cortas de estudio + bienestar emocional + canal de ayuda.">
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#0b5cff">
+  <style>
+    :root{
+      --bg: #0b0c10;
+      --panel: #11141b;
+      --text: #eaeef7;
+      --muted:#9aa3b2;
+      --brand:#0b5cff;
+      --ok:#16a34a;
+      --warn:#f59e0b;
+      --bad:#ef4444;
+      --card:#0f172a;
+      --radius: 16px;
+    }
+    @media (prefers-color-scheme: light) {
+      :root{ --bg:#f7f8fb; --panel:#ffffff; --text:#0f172a; --muted:#475569; --card:#ffffff; }
+    }
+    *,*:before,*:after{ box-sizing:border-box }
+    html,body{ height:100% }
+    body{
+      margin:0; font-family: system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, Noto Sans, "Helvetica Neue", Arial, "Apple Color Emoji", "Segoe UI Emoji";
+      background: var(--bg); color: var(--text); line-height:1.5;
+    }
+    .wrap{ max-width:1100px; margin-inline:auto; padding: 24px 16px 48px }
+    header{
+      display:grid; grid-template-columns: 1fr auto; gap:8px; align-items:center; margin-bottom: 16px;
+    }
+    .brand{ font-weight:700; font-size: clamp(18px, 2.2vw, 24px); letter-spacing:.2px }
+    .subtitle{ color:var(--muted); font-size: 13px }
+    .cta-row{ display:flex; gap:8px; align-items:center; flex-wrap: wrap }
+    button, .btn{
+      appearance:none; border:1px solid transparent; border-radius: 999px; padding:10px 14px; font-weight:600; cursor:pointer;
+      color:#fff; background:var(--brand); transition: .2s transform, .2s background, .2s opacity;
+    }
+    button[disabled]{ opacity:.6; cursor:not-allowed }
+    button.ghost{ background:transparent; color:var(--text); border-color:#2a3342 }
+    .pill{ font-size:12px; padding:6px 10px; border-radius:999px; background:#122; color:#8dc1ff; border:1px solid #1e293b }
+    .notice{
+      margin: 12px 0 20px; padding:12px 14px; border-radius: var(--radius);
+      background: #0a0f1e; border:1px solid #1e293b; color:#b8c8e9; font-size: 14px;
+    }
+    nav[role="tablist"]{
+      display:flex; gap:8px; flex-wrap:wrap; background: var(--panel); padding:8px; border-radius: 999px; border:1px solid #1f2937
+    }
+    [role="tab"]{
+      background: transparent; border:none; color:var(--text); border-radius:999px; padding:10px 14px; font-weight:600; cursor:pointer;
+      outline-offset: 4px;
+    }
+    [role="tab"][aria-selected="true"]{ background:#0e1a33; border:1px solid #1f2b44 }
+    .grid{ display:grid; gap:16px }
+    @media (min-width: 880px){
+      .grid-2{ grid-template-columns: 1.2fr .8fr }
+      .grid-3{ grid-template-columns: repeat(3, 1fr) }
+    }
+    section[role="tabpanel"]{
+      margin-top:16px; background: var(--panel); border:1px solid #1f2937; border-radius: var(--radius); padding: 16px;
+      box-shadow: 0 8px 40px rgba(0,0,0,.25);
+    }
+    h2{ font-size: clamp(18px, 2.2vw, 24px); margin: 0 0 12px }
+    h3{ margin: 14px 0 6px; font-size: 16px }
+    details{ background: var(--card); border:1px solid #1f2937; border-radius: 12px; padding: 10px 12px; margin:8px 0 }
+    details > summary{ cursor:pointer; font-weight:600 }
+    label{ display:block; font-size:14px; margin: 6px 0 4px }
+    input[type="text"], input[type="email"], textarea, select{
+      width:100%; background:#0b1022; color:var(--text); border:1px solid #1f2937; border-radius:10px; padding:10px 12px;
+    }
+    textarea{ min-height: 88px }
+    .row{ display:flex; flex-wrap: wrap; gap:10px; align-items:center }
+    .card{
+      background: var(--card); border:1px solid #1f2937; border-radius: 14px; padding: 12px
+    }
+    .kpis{ display:grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap:10px }
+    .kpi{ padding:12px; background:#0e1627; border:1px solid #1f2937; border-radius: 12px }
+    .kpi b{ font-size: 22px }
+    .muted{ color: var(--muted) }
+    .right{ text-align:right }
+    .spacer{ height:16px }
+    .foot{ margin-top: 16px; font-size: 12px; color:var(--muted) }
+    canvas{ width:100%; max-width: 640px; height: 300px; background:#0e1627; border-radius: 12px; border:1px solid #1f2937 }
+    .tag{ font-size:12px; padding:2px 8px; border-radius:999px; border:1px solid #1f2937; color:#9fb5ff }
+    .success{ color: var(--ok) } .warn{ color:var(--warn) } .bad{ color:var(--bad) }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <div>
+        <div class="brand">EduConecta · Guías + Bienestar + Ayuda</div>
+        <div class="subtitle">Prototipo v2 — Alineado con Plan de Reactivación Educativa (Convivencia y salud mental · Fortalecimiento de aprendizajes)</div>
+      </div>
+      <div class="cta-row">
+        <button id="btn-install" class="ghost" type="button" aria-label="Instalar aplicación">Instalar</button>
+        <button id="btn-export" type="button" aria-label="Exportar progreso">Exportar progreso</button>
+      </div>
+    </header>
+
+    <div class="notice" role="note">
+      <span class="pill">Privacidad</span> Este prototipo guarda tus datos <b>solo</b> en tu dispositivo (localStorage). No se envía información a servidores.
+    </div>
+
+    <nav role="tablist" aria-label="Secciones de EduConecta">
+      <button role="tab" aria-selected="true" aria-controls="tab-inicio" id="t-inicio" type="button">Inicio</button>
+      <button role="tab" aria-selected="false" aria-controls="tab-aprendo" id="t-aprendo" type="button">Aprendo</button>
+      <button role="tab" aria-selected="false" aria-controls="tab-estado" id="t-estado" type="button">Me siento</button>
+      <button role="tab" aria-selected="false" aria-controls="tab-ayuda" id="t-ayuda" type="button">Pide ayuda</button>
+      <button role="tab" aria-selected="false" aria-controls="tab-espacio" id="t-espacio" type="button">Mi espacio</button>
+      <button role="tab" aria-selected="false" aria-controls="tab-progreso" id="t-progreso" type="button">Mi progreso</button>
+    </nav>
+
+    <section role="tabpanel" id="tab-inicio" aria-labelledby="t-inicio">
+      <h2>Bienvenido/a 👋</h2>
+      <div class="grid grid-2">
+        <div class="card">
+          <p>EduConecta es una puerta de entrada <b>rápida</b> al estudio y al bienestar. En <em>2 minutos</em> puedes:</p>
+          <ul>
+            <li>Revisar una guía corta en <b>Aprendo</b>.</li>
+            <li>Tomar un mini test emocional en <b>Me siento</b>.</li>
+            <li>Contactar apoyo en <b>Pide ayuda</b>.</li>
+            <li>Guardar una frase que te motive en <b>Mi espacio</b>.</li>
+          </ul>
+          <p class="muted">Sugerencia: comienza con una guía “5 minutos” y registra cómo te sentiste. Podrás ver tu avance en <b>Mi progreso</b>.</p>
+        </div>
+        <div class="kpis">
+          <div class="kpi"><div class="muted">Guías completadas</div><b id="kpi-guias">0</b></div>
+          <div class="kpi"><div class="muted">Tests realizados</div><b id="kpi-tests">0</b></div>
+          <div class="kpi"><div class="muted">Días activos</div><b id="kpi-dias">0</b></div>
+        </div>
+      </div>
+      <div class="foot">Alineación Mineduc: Convivencia y Salud Mental; Fortalecimiento de Aprendizajes.</div>
+    </section>
+
+    <section role="tabpanel" id="tab-aprendo" aria-labelledby="t-aprendo" hidden>
+      <h2>Aprendo — Guías rápidas</h2>
+      <p class="muted">Elige una guía. Marca la micro-tarea de 5 minutos al terminar para sumar a tu progreso.</p>
+
+      <details>
+        <summary>Lenguaje: Comprensión lectora (5 min)</summary>
+        <ol>
+          <li>Lee este párrafo en voz alta.</li>
+          <li>Subraya la idea principal.</li>
+          <li>Anota 2 palabras nuevas y búscalas en el diccionario.</li>
+        </ol>
+        <label><input type="checkbox" data-guide="Lenguaje - Comprensión"> He completado esta micro-tarea</label>
+      </details>
+
+      <details>
+        <summary>Matemática: Proporciones (5 min)</summary>
+        <ol>
+          <li>Resuelve: Si 3 cuadernos cuestan $1.500, ¿cuánto cuestan 5?</li>
+          <li>Explica el procedimiento en una oración.</li>
+        </ol>
+        <label><input type="checkbox" data-guide="Matemática - Proporciones"> He completado esta micro-tarea</label>
+      </details>
+
+      <details>
+        <summary>Ciencias: Cambios de estado (5 min)</summary>
+        <ol>
+          <li>Enumera sólido, líquido y gas con 1 ejemplo cotidiano.</li>
+          <li>Dibuja el ciclo del agua en 4 pasos.</li>
+        </ol>
+        <label><input type="checkbox" data-guide="Ciencias - Cambios de estado"> He completado esta micro-tarea</label>
+      </details>
+
+      <details>
+        <summary>Historia: Línea de tiempo personal (5 min)</summary>
+        <ol>
+          <li>Dibuja 5 hitos de tu vida en orden cronológico.</li>
+          <li>Escribe 1 valor que aprendiste en cada hito.</li>
+        </ol>
+        <label><input type="checkbox" data-guide="Historia - Línea de tiempo"> He completado esta micro-tarea</label>
+      </details>
+    </section>
+
+    <section role="tabpanel" id="tab-estado" aria-labelledby="t-estado" hidden>
+      <h2>Me siento — Mini test (0 a 6)</h2>
+      <p class="muted">Marca lo que más se acerca a tu día de hoy.</p>
+      <div class="grid grid-3">
+        <div class="card">
+          <h3>Ánimo</h3>
+          <select id="mood">
+            <option value="0">Muy bajo (0)</option>
+            <option value="1">Bajo (1)</option>
+            <option value="2">Medio-bajo (2)</option>
+            <option value="3" selected>Medio (3)</option>
+            <option value="4">Medio-alto (4)</option>
+            <option value="5">Alto (5)</option>
+            <option value="6">Muy alto (6)</option>
+          </select>
+        </div>
+        <div class="card">
+          <h3>Estrés</h3>
+          <select id="stress">
+            <option value="0">Nada (0)</option>
+            <option value="1">Bajo (1)</option>
+            <option value="2" selected>Medio-bajo (2)</option>
+            <option value="3">Medio (3)</option>
+            <option value="4">Medio-alto (4)</option>
+            <option value="5">Alto (5)</option>
+            <option value="6">Muy alto (6)</option>
+          </select>
+        </div>
+        <div class="card">
+          <h3>Energía</h3>
+          <select id="energy">
+            <option value="0">Muy baja (0)</option>
+            <option value="1">Baja (1)</option>
+            <option value="2">Medio-baja (2)</option>
+            <option value="3" selected>Media (3)</option>
+            <option value="4">Medio-alta (4)</option>
+            <option value="5">Alta (5)</option>
+            <option value="6">Muy alta (6)</option>
+          </select>
+        </div>
+      </div>
+      <div class="row" style="margin-top:10px">
+        <button id="btn-test" type="button">Registrar mi día</button>
+        <span id="test-msg" class="muted" role="status" aria-live="polite"></span>
+      </div>
+      <div class="foot">Si tu puntaje total es ≤3 y persiste varios días, conversa con un adulto de confianza u orientación.</div>
+    </section>
+
+    <section role="tabpanel" id="tab-ayuda" aria-labelledby="t-ayuda" hidden>
+      <h2>Pide ayuda — Contacto rápido</h2>
+      <p class="muted">Este botón crea un mensaje <b>prellenado</b> que tú podrás revisar antes de enviarlo por tu correo o WhatsApp. No guardamos tus datos.</p>
+      <div class="grid grid-2">
+        <div class="card">
+          <label for="ayuda-motivo">Motivo breve (ej. "ansiedad antes de pruebas")</label>
+          <input id="ayuda-motivo" maxlength="80" type="text" placeholder="Escribe en pocas palabras">
+          <label for="ayuda-detalle">Detalle (opcional)</label>
+          <textarea id="ayuda-detalle" placeholder="Si quieres, agrega más contexto (no pongas datos privados)."></textarea>
+          <div class="row">
+            <button id="btn-mail" type="button">Crear correo</button>
+            <button id="btn-wa" class="ghost" type="button">Crear WhatsApp</button>
+          </div>
+        </div>
+        <div class="card">
+          <h3>Mensaje sugerido</h3>
+          <pre id="ayuda-preview" style="white-space: pre-wrap; font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, 'Liberation Mono', monospace; background:#0a0f1e; padding:10px; border-radius:10px; border:1px solid #1f2937"></pre>
+        </div>
+      </div>
+    </section>
+
+    <section role="tabpanel" id="tab-espacio" aria-labelledby="t-espacio" hidden>
+      <h2>Mi espacio — Nota motivacional</h2>
+      <label for="nota">Escribe una frase que te ayude a seguir</label>
+      <input id="nota" type="text" placeholder="Ej.: 'Puedo con esto si avanzo de a poco'">
+      <div class="row">
+        <button id="btn-nota" type="button">Guardar frase</button>
+        <span id="nota-msg" class="muted" role="status" aria-live="polite"></span>
+      </div>
+      <div class="spacer"></div>
+      <div class="card"><b>Tu frase:</b> <span id="nota-out" class="muted">Aún no guardas nada</span></div>
+    </section>
+
+    <section role="tabpanel" id="tab-progreso" aria-labelledby="t-progreso" hidden>
+      <h2>Mi progreso — Analítica local</h2>
+      <div class="grid grid-2">
+        <div>
+          <canvas id="chart"></canvas>
+        </div>
+        <div class="card">
+          <p class="muted">Resumen de las últimas 4 semanas:</p>
+          <ul id="resumen"></ul>
+          <div class="spacer"></div>
+          <div class="tag">Guías completadas: <b id="sum-guias">0</b></div>
+          <div class="tag">Tests registrados: <b id="sum-tests">0</b></div>
+          <div class="tag">Promedio de ánimo: <b id="sum-mood">–</b></div>
+        </div>
+      </div>
+      <div class="foot">Tus datos se almacenan localmente y puedes exportarlos desde Inicio → “Exportar progreso”.</div>
+    </section>
+
+    <div class="foot">
+      <p>© 2025 EduConecta · Prototipo para fines académicos. Código local, sin backend.</p>
+    </div>
+  </div>
+
+<script>
+// ---------- Utilidad de almacenamiento ----------
+const DB_KEY = "educonecta.v2";
+const db = JSON.parse(localStorage.getItem(DB_KEY) || '{"events":[], "notes":""}');
+
+function persist(){
+  localStorage.setItem(DB_KEY, JSON.stringify(db));
+  updateKPIs();
+}
+
+function todayKey(){
+  const d = new Date();
+  return d.toISOString().slice(0,10);
+}
+
+// ---------- Tabs accesibles (ARIA + teclado) ----------
+const tabs = Array.from(document.querySelectorAll('[role="tab"]'));
+const panels = Array.from(document.querySelectorAll('[role="tabpanel"]'));
+tabs.forEach((tab, idx) => {
+  tab.addEventListener('click', () => activateTab(idx, true));
+  tab.addEventListener('keydown', (e) => {
+    if (['ArrowRight','ArrowLeft','Home','End'].includes(e.key)){
+      e.preventDefault();
+      let i = idx;
+      if (e.key === 'ArrowRight') i = (idx+1) % tabs.length;
+      if (e.key === 'ArrowLeft') i = (idx-1+tabs.length) % tabs.length;
+      if (e.key === 'Home') i = 0;
+      if (e.key === 'End') i = tabs.length-1;
+      tabs[i].focus();
+      activateTab(i, false);
+    }
+  });
+});
+function activateTab(i, setFocus){
+  tabs.forEach((t, k)=>{
+    t.setAttribute('aria-selected', String(k===i));
+    panels[k].hidden = k!==i;
+  });
+  if (setFocus) panels[i].focus?.();
+}
+
+// ---------- KPIs (portada) ----------
+function uniqueDays(){
+  const set = new Set(db.events.map(e=>e.date));
+  return set.size;
+}
+function count(type){
+  return db.events.filter(e => e.type === type).length;
+}
+function updateKPIs(){
+  document.getElementById('kpi-guias').textContent = count('guide');
+  document.getElementById('kpi-tests').textContent = count('mood');
+  document.getElementById('kpi-dias').textContent = uniqueDays();
+}
+updateKPIs();
+
+// ---------- Guías: microtareas ----------
+document.querySelectorAll('input[type="checkbox"][data-guide]').forEach(chk=>{
+  chk.addEventListener('change', (e)=>{
+    if(e.target.checked){
+      const g = e.target.getAttribute('data-guide');
+      db.events.push({type:'guide', guide:g, date: todayKey(), ts: Date.now()});
+      persist();
+    }
+  });
+});
+
+// ---------- Mini test ----------
+document.getElementById('btn-test').addEventListener('click', ()=>{
+  const mood = +document.getElementById('mood').value;
+  const stress = +document.getElementById('stress').value;
+  const energy = +document.getElementById('energy').value;
+  const total = mood + (6-stress) + energy; // estrés invertido
+  db.events.push({type:'mood', mood, stress, energy, total, date: todayKey(), ts: Date.now()});
+  persist();
+  const msg = document.getElementById('test-msg');
+  let tone = 'success', text='¡Bien! Sigue así y toma descansos breves.';
+  if(total <= 6) { tone='bad'; text='Te veo cargado/a. Considera hablar con orientación o un adulto de confianza.' }
+  else if(total <= 9) { tone='warn'; text='Vas a media máquina. Intenta una guía de 5 minutos y respira profundo.' }
+  msg.className = tone;
+  msg.textContent = `Puntaje ${total}/18 · ${text}`;
+});
+
+// ---------- Pide Ayuda ----------
+function buildHelpText(){
+  const motivo = document.getElementById('ayuda-motivo').value.trim();
+  const detalle = document.getElementById('ayuda-detalle').value.trim();
+  const today = new Date().toLocaleDateString();
+  return `Hola, necesito apoyo.
+Motivo: ${motivo||'—'}
+Detalle: ${detalle||'—'}
+Fecha: ${today}
+
+Preferiría conversar en horario de clases o almuerzo.
+Gracias.`;
+}
+function preview(){
+  document.getElementById('ayuda-preview').textContent = buildHelpText();
+}
+['ayuda-motivo','ayuda-detalle'].forEach(id => document.getElementById(id).addEventListener('input', preview));
+preview();
+
+document.getElementById('btn-mail').addEventListener('click', ()=>{
+  const body = encodeURIComponent(buildHelpText());
+  location.href = `mailto:?subject=Solicitud%20de%20apoyo&body=${body}`;
+  db.events.push({type:'help', channel:'mail', date: todayKey(), ts: Date.now()});
+  persist();
+});
+
+document.getElementById('btn-wa').addEventListener('click', ()=>{
+  const body = encodeURIComponent(buildHelpText());
+  // WhatsApp universal (web/móvil)
+  window.open(`https://wa.me/?text=${body}`, '_blank');
+  db.events.push({type:'help', channel:'whatsapp', date: todayKey(), ts: Date.now()});
+  persist();
+});
+
+// ---------- Mi espacio ----------
+const notaIn = document.getElementById('nota');
+const notaOut = document.getElementById('nota-out');
+const notaMsg = document.getElementById('nota-msg');
+function loadNote(){
+  notaIn.value = db.notes || "";
+  notaOut.textContent = db.notes || "Aún no guardas nada";
+}
+loadNote();
+document.getElementById('btn-nota').addEventListener('click', ()=>{
+  db.notes = notaIn.value.trim();
+  persist();
+  notaMsg.textContent = "Guardado ✔";
+  notaOut.textContent = db.notes || "Aún no guardas nada";
+  setTimeout(()=> notaMsg.textContent = "", 2000);
+});
+
+// ---------- Progreso: gráfico + resumen ----------
+const ctx = document.getElementById('chart').getContext('2d');
+function getLastDays(n=28){
+  const arr = [];
+  const d = new Date();
+  for(let i=n-1;i>=0;i--){
+    const dt = new Date(d); dt.setDate(d.getDate()-i);
+    arr.push(dt.toISOString().slice(0,10));
+  }
+  return arr;
+}
+function byDate(){
+  const map = {};
+  db.events.forEach(e => {
+    map[e.date] = map[e.date] || {guides:0, moods:[], moodAvg: null};
+    if(e.type==='guide') map[e.date].guides++;
+    if(e.type==='mood') map[e.date].moods.push(e.total);
+  });
+  Object.values(map).forEach(v => {
+    v.moodAvg = v.moods.length ? (v.moods.reduce((a,b)=>a+b,0)/v.moods.length) : null;
+  });
+  return map;
+}
+
+// Simple canvas chart without external libs
+function drawChart(){
+  const labels = getLastDays(28);
+  const map = byDate();
+  const w = ctx.canvas.width, h = ctx.canvas.height;
+  ctx.clearRect(0,0,w,h);
+  // axes
+  ctx.strokeStyle = '#334155'; ctx.lineWidth = 1;
+  ctx.beginPath(); ctx.moveTo(40,10); ctx.lineTo(40,h-30); ctx.lineTo(w-10,h-30); ctx.stroke();
+  const maxY = 18; // mood total
+  // plot mood average
+  ctx.strokeStyle = '#4ade80'; ctx.lineWidth = 2; ctx.beginPath();
+  labels.forEach((d, i)=>{
+    const v = (map[d]?.moodAvg ?? null);
+    if(v==null) return;
+    const x = 40 + i * ((w-50)/labels.length);
+    const y = (h-30) - (v/maxY)*(h-50);
+    if(i===0 || (map[labels[i-1]]?.moodAvg==null)) ctx.moveTo(x,y); else ctx.lineTo(x,y);
+  });
+  ctx.stroke();
+  // bars guides
+  ctx.fillStyle = '#60a5fa';
+  labels.forEach((d, i)=>{
+    const g = map[d]?.guides || 0;
+    if(!g) return;
+    const x = 40 + i * ((w-50)/labels.length);
+    const barw = Math.max(2,(w-50)/labels.length * .5);
+    const y = (h-30) - (g/5)*(h-50);
+    ctx.fillRect(x, y, barw, (h-30)-y);
+  });
+  // summary
+  document.getElementById('sum-guias').textContent = count('guide');
+  document.getElementById('sum-tests').textContent = count('mood');
+  const moods = db.events.filter(e=>e.type==='mood').map(e=>e.total);
+  document.getElementById('sum-mood').textContent = moods.length ? (moods.reduce((a,b)=>a+b,0)/moods.length).toFixed(1) : '–';
+  // list
+  const ul = document.getElementById('resumen'); ul.innerHTML = '';
+  const last7 = labels.slice(-7);
+  last7.forEach(d=>{
+    const g = byDate()[d]?.guides || 0;
+    const m = byDate()[d]?.moodAvg;
+    const li = document.createElement('li');
+    li.textContent = `${d}: guías ${g} · ánimo ${m==null?'—':m.toFixed(1)}`;
+    ul.appendChild(li);
+  });
+}
+drawChart();
+
+// ---------- Export JSON ----------
+document.getElementById('btn-export').addEventListener('click', ()=>{
+  const blob = new Blob([JSON.stringify(db, null, 2)], {type:'application/json'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = 'educonecta_progreso.json';
+  a.click();
+  URL.revokeObjectURL(url);
+});
+
+// ---------- PWA: instalar ----------
+let deferredPrompt = null;
+window.addEventListener('beforeinstallprompt', (e)=>{
+  e.preventDefault();
+  deferredPrompt = e;
+  document.getElementById('btn-install').disabled = false;
+});
+document.getElementById('btn-install').addEventListener('click', async ()=>{
+  if(!deferredPrompt) return;
+  deferredPrompt.prompt();
+  await deferredPrompt.userChoice;
+  deferredPrompt = null;
+  document.getElementById('btn-install').disabled = true;
+});
+
+// Registrar SW
+if('serviceWorker' in navigator){
+  window.addEventListener('load', ()=>{
+    navigator.serviceWorker.register('sw.js');
+  });
+}
+</script>
+</body>
+</html>
